@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <script src="/utils/logger.js"></script>
+</head>
+<body>
+<script>
+const q = new URLSearchParams(window.location.search);
+
+// Build OAuth URL
+const url = "https://accounts.google.com/o/oauth2/auth?" + q.toString();
+
+// Optional: log what you're sending
+console.log("Redirecting to:", url);
+
+// Launch OAuth
+window.location.href = url;
+</script>
+</body>
+</html>

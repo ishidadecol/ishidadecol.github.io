@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>POC Lab</title>
+</head>
+<body>
+  <h1>OAuth POC Lab</h1>
+
+  <h3>Quick Launch</h3>
+
+  <form id="form">
+    <label>Provider:</label>
+    <select id="provider">
+      <option value="google">Google</option>
+      <option value="generic">Generic</option>
+    </select><br><br>
+
+    <label>Client ID:</label>
+    <input id="client_id" size="60"><br><br>
+
+    <label>Redirect URI:</label>
+    <input id="redirect_uri" size="60"><br><br>
+
+    <label>Response Type:</label>
+    <input id="response_type" value="code id_token"><br><br>
+
+    <label>Scope:</label>
+    <input id="scope" value="email profile"><br><br>
+
+    <label>Prompt:</label>
+    <input id="prompt" value="none"><br><br>
+
+    <button type="submit">Launch</button>
+  </form>
+
+  <script>
+    document.getElementById("form").onsubmit = function(e) {
+      e.preventDefault();
+
+      const params = new URLSearchParams({
+        client_id: client_id.value,
+        redirect_uri: redirect_uri.value,
+        response_type: response_type.value,
+        scope: scope.value,
+        prompt: prompt.value,
+        state: "POC_" + Math.random(),
+        nonce: "TEST_" + Math.random()
+      });
+
+      const provider = document.getElementById("provider").value;
+      window.location = `/oauth/${provider}.html?` + params.toString();
+    };
+  </script>
+</body>
+</html>

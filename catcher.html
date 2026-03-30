@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <script src="/utils/logger.js"></script>
+</head>
+<body>
+<h2>Callback Data</h2>
+<pre id="out"></pre>
+
+<script>
+const data = {
+  hash: window.location.hash,
+  search: window.location.search
+};
+
+document.getElementById("out").innerText = JSON.stringify(data, null, 2);
+
+console.log("Captured:", data);
+</script>
+</body>
+</html>
