@@ -49,13 +49,14 @@ function buildState() {
   try {
     const raw = document.getElementById("state_json").value;
     const obj = JSON.parse(raw);
-    return encodeURIComponent(JSON.stringify(obj));
+
+    return JSON.stringify(obj);
+
   } catch (e) {
     alert("Invalid JSON in state");
     throw e;
   }
 }
-
 function launch() {
   const params = new URLSearchParams();
 
